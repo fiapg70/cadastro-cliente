@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Example template for an HTTP API that creates, updates, and deletes items in DynamoDB
+Parameters:
+  HashKeyElementNameId:
+    Description: HashType PrimaryKey Name
+    Default: id
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]*'
+    MinLength: '1'
+    MaxLength: '2048'
+    ConstraintDescription: must contain only alphanumberic characters
+  BucketName:
+    Default: address-swagger-bucket
+    Type: String
+    Description: The name of the S3 bucket
+  HashKeyElementCreateDate:
+    Description: HashType PrimaryKey Create Date
+    Default: create_date
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9_]*'
+    MinLength: '1'
+    MaxLength: '2048'
+    ConstraintDescription: must contain only alphanumberic characters
+  HashKeyElementType:
+    Description: HashType PrimaryKey Type
+    Type: String
+    Default: S
+    AllowedPattern: '[S|N]'
+    MinLength: '1'
+    MaxLength: '1'
+    ConstraintDescription: must be either S or N
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: '5'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: '10'
+    MinValue: '5'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  AddressesCatalogApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: address-api
+      StageName: dev # a!Ref StageName
+      DefinitionBody:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: !Join [ "", [ "s3://", !Ref BucketName, "/swagger.yaml" ] ]
+
+  # Policy required for all lambda function roles.
+  BaseLambdaExecutionPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Base permissions needed by all lambda functions.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - ec2:CreateNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+            Resource: "*"
+
+  MyApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt DDBHandlerFunction.Arn
+                  
+  DDBHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt AddressesLambdaRole.Arn
+      CodeUri: dynamo-handler/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          HELLO_DB: !Sub "arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref myDynamoDBTable
+      Events:
+        GetAllItems:
+          Type: HttpApi
+          Properties:
+            #ApiId: !Ref AddressesCatalogApi
+            Path: /addresses
+            Method: GET
+        GetAnItem:
+          Type: HttpApi
+          Properties:
+            #ApiId: !Ref AddressesCatalogApi
+            Path: /addresses/{id}
+            Method: GET
+        DeleteAnItem:
+          Type: HttpApi
+          Properties:
+            #ApiId: !Ref AddressesCatalogApi
+            Path: /addresses/{id}
+            Method: DELETE
+        CreateOrUpdateItem:
+          Type: HttpApi
+          Properties:
+            #ApiId: !Ref AddressesCatalogApi
+            Path: /addresses
+            Method: PUT
+
+###############################myDynamoDBTable###########################################
+#   DynamoDB                                                             #
+##########################################################################
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "addresses"
+      AttributeDefinitions:
+      - AttributeName: !Ref 'HashKeyElementNameId'
+        AttributeType: !Ref 'HashKeyElementType'
+      - AttributeName: !Ref 'HashKeyElementCreateDate'
+        AttributeType: !Ref 'HashKeyElementType'
+      KeySchema:        
+      - AttributeName: !Ref 'HashKeyElementNameId'       
+        KeyType: HASH
+      - AttributeName: !Ref 'HashKeyElementCreateDate'       
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref 'ReadCapacityUnits'
+        WriteCapacityUnits: !Ref 'WriteCapacityUnits'
+
+  AddressesLambdaRole:  # -> AppAPIRole
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref BaseLambdaExecutionPolicy
+      Policies:
+        - PolicyName: getAddresses
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}"
+        - PolicyName: putAddresses
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}"
+        - PolicyName: scanAddresses
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:Scan
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}"
+        - PolicyName: updateAddresses
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}"                                        
+Outputs:
+  ApiEndpoint:
+    Description: "The invoke URL for our HTTP API"
+    Value: !Sub "https://${AddressesCatalogApi}.execute-api.${AWS::Region}.amazonaws.com/addresses"
+  Function:
+    Description: "DynamoDB handler function ARN"
+    Value: !GetAtt DDBHandlerFunction.Arn

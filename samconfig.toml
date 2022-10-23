@@ -1,0 +1,13 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "addresses-stack"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1jwv8z3dljd2m"
+s3_prefix = "addresses-stack"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+image_repositories = []
+parameter_overrides = "HashKeyElementNameId=\"id\" BucketName=\"address-swagger-bucket\" HashKeyElementCreateDate=\"create_date\" HashKeyElementType=\"S\" ReadCapacityUnits=\"5\" WriteCapacityUnits=\"10\""

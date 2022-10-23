@@ -1,0 +1,69 @@
+openapi: "3.0.1"
+info:
+  title: "addresses-stack"
+  version: "1.0"
+servers:
+- url: "https://vhpp90jfw0.execute-api.us-east-1.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: ""
+tags:
+- name: "aws:cloudformation:stack-name"
+  x-amazon-apigateway-tag-value: "addresses-stack"
+- name: "aws:cloudformation:logical-id"
+  x-amazon-apigateway-tag-value: "ServerlessHttpApi"
+- name: "aws:cloudformation:stack-id"
+  x-amazon-apigateway-tag-value: "arn:aws:cloudformation:us-east-1:147397866377:stack/addresses-stack/45f4b490-52d5-11ed-974e-0e965e160c41"
+- name: "httpapi:createdBy"
+  x-amazon-apigateway-tag-value: "SAM"
+paths:
+  /addresses/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /addresses/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        connectionType: "INTERNET"
+    delete:
+      responses:
+        default:
+          description: "Default response for DELETE /addresses/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        connectionType: "INTERNET"
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /addresses:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /addresses"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        connectionType: "INTERNET"
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /addresses"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        connectionType: "INTERNET"
+x-amazon-apigateway-importexport-version: "1.0"

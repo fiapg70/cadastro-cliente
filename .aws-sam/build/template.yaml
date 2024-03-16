@@ -14,9 +14,17 @@ Parameters:
     MaxLength: '2048'
     ConstraintDescription: must contain only alphanumberic characters
   BucketName:
-    Default: address-swagger-bucket
+    Default: client-swagger-bucket
     Type: String
     Description: The name of the S3 bucket
+  FQDN:
+    Default: iotechweek.com.br
+    Type: String
+    Description: The FQDN name
+  ZoneId:
+    Default: Z19I9C90318W7Z
+    Type: String
+    Description: The ZoneId number
   HashKeyElementCreateDate:
     Description: HashType PrimaryKey Create Date
     Default: create_date
@@ -51,11 +59,30 @@ Globals:
   Function:
     Timeout: 10
 Resources:
-  AddressesCatalogApi:
+  GenerateCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName:
+        Ref: FQDN
+      ValidationMethod: DNS
+      DomainValidationOptions:
+      - DomainName:
+          Ref: FQDN
+        HostedZoneId:
+          Ref: ZoneId
+  ClientesCatalogApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: address-api
-      StageName: dev
+      Name: client-api
+      StageName: Prod
+      Domain:
+        DomainName:
+          Ref: FQDN
+        CertificateArn:
+          Ref: GenerateCertificate
+        Route53:
+          HostedZoneId:
+            Ref: ZoneId
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
@@ -109,11 +136,13 @@ Resources:
     Properties:
       Role:
         Fn::GetAtt:
-        - AddressesLambdaRole
+        - ClientsLambdaRole
         - Arn
       CodeUri: DDBHandlerFunction
       Handler: app.handler
-      Runtime: nodejs12.x
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-client
+      Runtime: nodejs18.x
       Environment:
         Variables:
           HELLO_DB:
@@ -126,29 +155,39 @@ Resources:
         GetAllItems:
           Type: HttpApi
           Properties:
-            Path: /addresses
+            Path: /clients
             Method: GET
         GetAnItem:
           Type: HttpApi
           Properties:
-            Path: /addresses/{id}
+            Path: /clients/{id}
             Method: GET
         DeleteAnItem:
           Type: HttpApi
           Properties:
-            Path: /addresses/{id}
+            Path: /clients/{id}
             Method: DELETE
         CreateOrUpdateItem:
           Type: HttpApi
           Properties:
-            Path: /addresses
+            Path: /clients
             Method: PUT
     Metadata:
       SamResourceId: DDBHandlerFunction
+  ConfigLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - ClientesCatalogApi
+    - DDBHandlerFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::Sub: ${AWS::StackName}-client
+      Principal: apigateway.amazonaws.com
   myDynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: addresses
+      TableName: clients
       AttributeDefinitions:
       - AttributeName:
           Ref: HashKeyElementNameId
@@ -170,7 +209,7 @@ Resources:
           Ref: ReadCapacityUnits
         WriteCapacityUnits:
           Ref: WriteCapacityUnits
-  AddressesLambdaRole:
+  ClientsLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -183,7 +222,7 @@ Resources:
       ManagedPolicyArns:
       - Ref: BaseLambdaExecutionPolicy
       Policies:
-      - PolicyName: getAddresses
+      - PolicyName: getClients
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -192,7 +231,7 @@ Resources:
             - dynamodb:GetItem
             Resource:
               Fn::Sub: arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}
-      - PolicyName: putAddresses
+      - PolicyName: putClients
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -201,7 +240,7 @@ Resources:
             - dynamodb:PutItem
             Resource:
               Fn::Sub: arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}
-      - PolicyName: scanAddresses
+      - PolicyName: scanClients
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -210,7 +249,7 @@ Resources:
             - dynamodb:Scan
             Resource:
               Fn::Sub: arn:aws:dynamodb:${AWS::Region}:*:table/${myDynamoDBTable}
-      - PolicyName: updateAddresses
+      - PolicyName: updateClients
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -223,7 +262,7 @@ Outputs:
   ApiEndpoint:
     Description: The invoke URL for our HTTP API
     Value:
-      Fn::Sub: https://${AddressesCatalogApi}.execute-api.${AWS::Region}.amazonaws.com/addresses
+      Fn::Sub: https://${FQDN}
   Function:
     Description: DynamoDB handler function ARN
     Value:

@@ -1,6 +1,6 @@
 openapi: "3.0.1"
 info:
-  title: "addresses-stack"
+  title: "clients-stack"
   version: "1.0"
 servers:
 - url: "https://vhpp90jfw0.execute-api.us-east-1.amazonaws.com/{basePath}"
@@ -9,34 +9,34 @@ servers:
       default: ""
 tags:
 - name: "aws:cloudformation:stack-name"
-  x-amazon-apigateway-tag-value: "addresses-stack"
+  x-amazon-apigateway-tag-value: "clients-stack"
 - name: "aws:cloudformation:logical-id"
   x-amazon-apigateway-tag-value: "ServerlessHttpApi"
 - name: "aws:cloudformation:stack-id"
-  x-amazon-apigateway-tag-value: "arn:aws:cloudformation:us-east-1:147397866377:stack/addresses-stack/45f4b490-52d5-11ed-974e-0e965e160c41"
+  x-amazon-apigateway-tag-value: "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/clients-stack/45f4b490-52d5-11ed-974e-0e965e160c41"
 - name: "httpapi:createdBy"
   x-amazon-apigateway-tag-value: "SAM"
 paths:
-  /addresses/{id}:
+  /clients/{id}:
     get:
       responses:
         default:
-          description: "Default response for GET /addresses/{id}"
+          description: "Default response for GET /clients/{id}"
       x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:clients-client/invocations"
         connectionType: "INTERNET"
     delete:
       responses:
         default:
-          description: "Default response for DELETE /addresses/{id}"
+          description: "Default response for DELETE /clients/{id}"
       x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:clients-client/invocations"
         connectionType: "INTERNET"
     parameters:
     - name: "id"
@@ -45,25 +45,25 @@ paths:
       required: true
       schema:
         type: "string"
-  /addresses:
+  /clients:
     get:
       responses:
         default:
-          description: "Default response for GET /addresses"
+          description: "Default response for GET /clients"
       x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:clients-client/invocations"
         connectionType: "INTERNET"
     put:
       responses:
         default:
-          description: "Default response for PUT /addresses"
+          description: "Default response for PUT /clients"
       x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:147397866377:function:addresses-stack-DDBHandlerFunction-wDUvtPbZazoE/invocations"
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:clients-client/invocations"
         connectionType: "INTERNET"
 x-amazon-apigateway-importexport-version: "1.0"

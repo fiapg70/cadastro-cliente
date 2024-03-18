@@ -19,7 +19,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: <sua-região-da-AWS>  # substitua pela região correta
+        aws-region: us-east-1  # substitua pela região correta
 
     - name: Install AWS SAM CLI
       run: |

@@ -16,11 +16,11 @@ Parameters:
     Type: String
     Description: The name of the S3 bucket
   FQDN:
-    Default: iotechweek.com.br
+    Default: sevenfood.com.br
     Type: String
     Description: The FQDN name
   ZoneId:
-    Default: Z19I9C90318W7Z
+    Default: Z07325041H6UKUTZXWS4K
     Type: String
     Description: The ZoneId number
   HashKeyElementCreateDate:

@@ -21,15 +21,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1  # substitua pela região correta
 
-    - name: Install AWS SAM CLI
-      run: |
-        curl -o "aws-sam-cli-installation-script.sh" "https://raw.githubusercontent.com/aws/aws-sam-cli/develop/installation/installation-script-linux-macos.sh"
-        chmod +x aws-sam-cli-installation-script.sh
-        ./aws-sam-cli-installation-script.sh -y
-        sam --version
-
     - name: Build SAM application
       run: sam build
 
     - name: Deploy SAM application
-      run: sam deploy --stack-name sevenfood-stack
+      run: sam deploy --stack-name sevenfood-stack --no-confirm-changeset --no-fail-on-empty-changeset

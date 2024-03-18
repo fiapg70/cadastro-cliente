@@ -23,7 +23,7 @@ jobs:
 
     - name: Install AWS SAM CLI
       run: |
-        curl -o "aws-sam-cli-installation-script.sh" "https://raw.githubusercontent.com/aws/aws-sam-cli/develop/installation.sh"
+        curl -o "aws-sam-cli-installation-script.sh" "https://raw.githubusercontent.com/aws/aws-sam-cli/develop/installation/installation-script-linux-macos.sh"
         chmod +x aws-sam-cli-installation-script.sh
         ./aws-sam-cli-installation-script.sh -y
         sam --version

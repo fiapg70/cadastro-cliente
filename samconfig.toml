@@ -10,4 +10,4 @@ confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
 image_repositories = []
-parameter_overrides = "HashKeyElementNameId=\"id\" BucketName=\"client-swagger-bucket\" FQDN=\"iotechweek.com.br\" ZoneId=\"Z19I9C90318W7Z\" HashKeyElementCreateDate=\"create_date\" HashKeyElementType=\"S\" ReadCapacityUnits=\"5\" WriteCapacityUnits=\"10\""
+parameter_overrides = "HashKeyElementNameId=\"id\" BucketName=\"client-swagger-bucket\" FQDN=\"sevenfood.com.br\" ZoneId=\"Z07325041H6UKUTZXWS4K\" HashKeyElementCreateDate=\"create_date\" HashKeyElementType=\"S\" ReadCapacityUnits=\"5\" WriteCapacityUnits=\"10\""

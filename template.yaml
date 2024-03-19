@@ -58,7 +58,30 @@ Globals:
     Timeout: 10
 
 Resources:
- # Create our SSL certificate
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: "MyUserPool"
+      # Configurações adicionais conforme necessário
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: "MyUserPoolClient"
+      UserPoolId: !Ref UserPool
+      # Configurações adicionais conforme necessário
+
+  ApiAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: "CognitoAuthorizer"
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref ClientesCatalogApi
+      ProviderARNs:
+        - !GetAtt UserPool.Arn
+
+  # Create our SSL certificate
   GenerateCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties: 
@@ -147,25 +170,29 @@ Resources:
             #ApiId: !Ref ClientsCatalogApi
             Path: /clients
             Method: GET
+            AuthorizerId: !Ref ApiAuthorizer
         GetAnItem:
           Type: HttpApi
           Properties:
             #ApiId: !Ref ClientsCatalogApi
             Path: /clients/{id}
             Method: GET
+            AuthorizerId: !Ref ApiAuthorizer
         DeleteAnItem:
           Type: HttpApi
           Properties:
             #ApiId: !Ref ClientsCatalogApi
             Path: /clients/{id}
             Method: DELETE
+            AuthorizerId: !Ref ApiAuthorizer
         CreateOrUpdateItem:
           Type: HttpApi
           Properties:
             #ApiId: !Ref ClientsCatalogApi
             Path: /clients
             Method: PUT
-
+            AuthorizerId: !Ref ApiAuthorizer
+            
   ConfigLambdaPermission:
     Type: "AWS::Lambda::Permission"
     DependsOn:

@@ -11,10 +11,10 @@ exports.handler = async (event, context) => {
 
   try {
     switch (event.routeKey) {
-      case "DELETE /addresses/{id}":
+      case "DELETE /clients/{id}":
         await dynamo
           .delete({
-            TableName: "addresses",
+            TableName: "clients",
             Key: {
               id: event.pathParameters.id
             }
@@ -22,24 +22,24 @@ exports.handler = async (event, context) => {
           .promise();
         body = `Deleted item ${event.pathParameters.id}`;
         break;
-      case "GET /addresses/{id}":
+      case "GET /clients/{id}":
         body = await dynamo
           .get({
-            TableName: "addresses",
+            TableName: "clients",
             Key: {
               id: event.pathParameters.id
             }
           })
           .promise();
         break;
-      case "GET /addresses":
+      case "GET /clients":
         body = await dynamo.scan({ TableName: "addresses" }).promise();
         break;
-      case "PUT /addresses":
+      case "PUT /clients":
         let requestJSON = JSON.parse(event.body);
         await dynamo
           .put({
-            TableName: "addresses",
+            TableName: "clients",
             Item: {
               id: requestJSON.id,
               create_date: requestJSON.create_date,
